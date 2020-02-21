@@ -8,20 +8,6 @@ DB = {
     "classes": []
 }
 
-# {
-#     "id" : 1234456,
-#     "name" : "Bob Smith"
-# }
-#
-# {
-#     "id": 1122334,
-#     "name": "CMPE-273",
-#     "students": []
-# }
-
-
-import json
-
 
 class Student(object):
     def __init__(self, name):
@@ -69,7 +55,6 @@ def add_student():
 
 @app.route('/students/<student_id>', methods=['GET'])
 def get_student(student_id):
-    print(DB["students"], student_id)
     for x in DB["students"]:
         if str(x['id']) == student_id:
             return x, 200
@@ -81,29 +66,32 @@ def add_class():
     if request.method == 'POST':
         name = request.get_json()['name']
         class_obj = Class(name).response()
-        DB["students"].append(class_obj)
+        DB["classes"].append(class_obj)
         return jsonify(class_obj), 201
     if request.method == 'GET':
         return jsonify(DB["classes"]), 201
 
 
-@app.route('/classes/<student_id>', methods=['GET'])
-def get_class(student_id):
-    print(DB["classes"], student_id)
+@app.route('/classes/<class_id>', methods=['GET'])
+def get_class(class_id):
+    print(DB["classes"], class_id)
     for x in DB["classes"]:
-        if str(x['id']) == student_id:
-            return x, 200
-    return "No class found with this ID", 200
+        if str(x['id']) == class_id:
+            return x, 201
+    return "No class found with this ID", 201
 
 
-@app.route('/classes/<student_id>', methods=['PATCH'])
-def add_class(student_id):
-    for x in DB["students"]:
-        if str(x['id']) == student_id:
-            DB["classes"][0]["students"].append(x)
-            return DB["classes"], 200
-    return "No student found with this ID", 200
+@app.route('/classes/<class_id>', methods=['PATCH'])
+def add_student_to_class(class_id):
+    for index, c in enumerate(DB["classes"]):
+        if str(c['id']) == class_id:
+            student_id = request.get_json()['student_id']
+            for x in DB["students"]:
+                if str(x['id']) == student_id:
+                    DB["classes"][index]["students"].append(x)
+                    return DB["classes"][index], 201
+    return "The class or student could not be found with this ID", 201
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# if __name__ == "__main__":
+#     app.run(debug=True)
